@@ -470,9 +470,7 @@ button {
   gap: 16px;
   padding: 40px;
   border-radius: 28px;
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background: #FFFFFF;
   border: 1px solid rgba(228, 228, 231, 0.6);
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.04);
   animation: splashPulse 3s infinite ease-in-out;
@@ -513,7 +511,7 @@ button {
 }
 
 .splash-title {
-  fontSize: 22px;
+  font-size: 24px;
   font-weight: 800;
   color: #18181B;
   letter-spacing: -0.5px;
@@ -521,10 +519,10 @@ button {
 }
 
 .splash-subtitle {
-  fontSize: 13px;
+  font-size: 14px;
   color: #71717A;
   margin: 0;
-  font-weight: 600;
+  font-weight: 500;
 }
 
 @keyframes splashSpin {

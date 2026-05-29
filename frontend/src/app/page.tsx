@@ -280,8 +280,8 @@ export default function MainPage() {
               <div className="splash-spinner" />
               <div className="splash-logo-box">
                 <svg width="32" height="32" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M 20 25 L 45 25 L 58 75 L 33 75 Z" fill="#FFFFFF" opacity="0.9" />
-                  <path d="M 55 25 L 80 25 L 68 75 L 43 75 Z" fill="#FFFFFF" />
+                  <path d="M 22 34 L 42 34 L 54 74 L 34 74 Z" fill="#FFFFFF" opacity="0.9" />
+                  <path d="M 58 34 L 78 34 L 66 74 L 46 74 Z" fill="#FFFFFF" />
                 </svg>
               </div>
             </div>
