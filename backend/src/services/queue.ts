@@ -6,10 +6,13 @@ dotenv.config();
 
 const REDIS_HOST = process.env.REDIS_HOST || '127.0.0.1';
 const REDIS_PORT = parseInt(process.env.REDIS_PORT || '6379', 10);
+const REDIS_PASSWORD = process.env.REDIS_PASSWORD;
 
 export const redisConnection = new IORedis({
   host: REDIS_HOST,
   port: REDIS_PORT,
+  password: REDIS_PASSWORD,
+  tls: REDIS_PASSWORD ? {} : undefined, // Upstash requires TLS
   maxRetriesPerRequest: null, // Critical requirement for BullMQ
 });
 
