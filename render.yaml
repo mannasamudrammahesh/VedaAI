@@ -3,23 +3,28 @@ services:
     name: veda-backend
     env: node
     plan: free
-    rootDir: backend
-    buildCommand: npm install && npm run build
-    startCommand: npm start
+    buildCommand: "cd backend && npm install && npm run build"
+    startCommand: "cd backend && npm start"
     envVars:
       - key: PORT
-        value: 5000
-      - key: NODE_ENV
-        value: production
-      - key: MONGO_URI
-        sync: false
+        value: 10000
       - key: REDIS_HOST
-        sync: false
+        fromService:
+          type: redis
+          name: veda-redis
+          property: host
       - key: REDIS_PORT
-        sync: false
-      - key: REDIS_PASSWORD
+        fromService:
+          type: redis
+          name: veda-redis
+          property: port
+      # We define these without values so Render prompts you to fill them in the dashboard
+      - key: MONGO_URI
         sync: false
       - key: GEMINI_API_KEY
         sync: false
-      - key: GROK_API_KEY
-        sync: false
+
+  - type: redis
+    name: veda-redis
+    plan: free
+    maxmemoryPolicy: noeviction
