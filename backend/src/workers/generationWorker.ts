@@ -58,7 +58,6 @@ export const processGenerationDirectly = async (data: {
 
     // Step 2: Preparing inputs
     await updateProgress(30, 'Parsing questions configurations & upload streams...');
-    await new Promise((resolve) => setTimeout(resolve, 800)); // Smooth transition pause for visual feedback
 
     // Step 3: Call AI Service
     await updateProgress(60, 'Generating assessment sections and custom answer key using Grok AI...');
@@ -75,7 +74,6 @@ export const processGenerationDirectly = async (data: {
 
     // Step 4: Validating and saving
     await updateProgress(85, 'Polishing structure, tags, and formatting layouts...');
-    await new Promise((resolve) => setTimeout(resolve, 600)); // Smooth visual pause
 
     assignment.generatedPaper = generatedPaper;
     assignment.status = 'completed';
