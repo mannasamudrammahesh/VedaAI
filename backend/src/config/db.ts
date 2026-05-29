@@ -30,9 +30,9 @@ export const connectDB = async (): Promise<void> => {
     }
 
     // Seed mock assignments if database is empty or no assignments exist for the demo user
-    const count = await Assignment.countDocuments();
+    const count = await Assignment.countDocuments({ createdBy: demoUser!._id });
     if (count === 0 && demoUser) {
-      console.log('Database is empty. Seeding 6 mock "Quiz on Electricity" assignments matching Figma mockup...');
+      console.log('Demo user has no assignments. Seeding 6 mock "Quiz on Electricity" assignments matching Figma mockup...');
       
       const mockAssignments = Array.from({ length: 6 }).map((_, i) => ({
         title: 'Quiz on Electricity',

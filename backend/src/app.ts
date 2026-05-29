@@ -108,7 +108,7 @@ app.post('/api/auth/login', async (req, res) => {
 app.get('/api/assignments', authMiddleware, async (req, res) => {
   try {
     const userId = (req as any).userId;
-    const assignments = await Assignment.find({ createdBy: userId }).sort({ createdAt: -1 });
+    const assignments = await Assignment.find({ createdBy: userId }).select('-fileContentBase64').sort({ createdAt: -1 });
     res.json(assignments);
   } catch (error: any) {
     res.status(500).json({ error: error.message });
