@@ -274,8 +274,72 @@ export default function MainPage() {
   return (
     <>
       {!mounted ? (
-        <div className="splash-container">
-          <div className="loader-ring" style={{ width: '48px', height: '48px', borderWidth: '4px' }}></div>
+        <div style={{
+          position: 'fixed',
+          top: 0, left: 0, right: 0, bottom: 0,
+          background: 'linear-gradient(135deg, #09090b 0%, #18181b 100%)',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 99999,
+          fontFamily: 'system-ui, -apple-system, sans-serif'
+        }}>
+          <div style={{
+            position: 'relative',
+            width: '80px',
+            height: '80px',
+            marginBottom: '24px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
+            <div style={{
+              position: 'absolute',
+              inset: 0,
+              borderRadius: '50%',
+              border: '3px solid transparent',
+              borderTopColor: '#F59223',
+              borderRightColor: '#7E1515',
+              animation: 'spin 1s linear infinite'
+            }}></div>
+            <div style={{
+              position: 'absolute',
+              inset: '8px',
+              borderRadius: '50%',
+              border: '3px solid transparent',
+              borderBottomColor: '#FFFFFF',
+              borderLeftColor: '#C2C2C2',
+              animation: 'spin 1.5s linear infinite reverse'
+            }}></div>
+            <svg width="32" height="32" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ animation: 'pulse 2s ease-in-out infinite' }}>
+              <path d="M 22 34 L 42 34 L 54 74 L 34 74 Z" fill="#C2C2C2" />
+              <path d="M 58 34 L 78 34 L 66 74 L 46 74 Z" fill="#FFFFFF" />
+            </svg>
+          </div>
+          <h2 style={{
+            color: '#FFFFFF',
+            fontSize: '24px',
+            fontWeight: 700,
+            letterSpacing: '-0.5px',
+            margin: '0 0 8px 0',
+            background: 'linear-gradient(to right, #ffffff, #a1a1aa)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            animation: 'pulse 2s ease-in-out infinite'
+          }}>VedaAI</h2>
+          <p style={{
+            color: '#A1A1AA',
+            fontSize: '14px',
+            margin: 0,
+            fontWeight: 500,
+            letterSpacing: '0.5px',
+            animation: 'pulse 2s ease-in-out infinite'
+          }}>INITIALIZING WORKSPACE</p>
+          <style dangerouslySetInnerHTML={{__html: `
+            @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+            @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+          `}} />
         </div>
       ) : !isAuthenticated ? (
         <div className="auth-fullscreen-container">

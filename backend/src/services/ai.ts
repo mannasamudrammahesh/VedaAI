@@ -225,6 +225,7 @@ OUTPUT A RAW JSON STRING MATCHING THIS EXACT SCHEMA:
     if (!this.apiKey) {
       // Simulate network latency and run high-fidelity mock generator
       console.log('Running high-fidelity mock question generator...');
+      await new Promise((resolve) => setTimeout(resolve, 2500));
       return this.generateMockPaper(promptContext, questionTypes, totalQuestionsCount, totalMarks, additionalInstructions, fileName, pptxText || textContent, className);
     }
 

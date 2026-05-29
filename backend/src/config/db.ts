@@ -29,11 +29,10 @@ export const connectDB = async (): Promise<void> => {
       console.log('Successfully seeded "teacher@veda.ai" with password "password123".');
     }
 
-    // Seed mock assignments if demo user has fewer than 6 assignments (to restore missing ones)
-    if (demoUser) {
-      const demoAssignmentsCount = await Assignment.countDocuments({ createdBy: demoUser._id });
-      if (demoAssignmentsCount < 6) {
-        console.log('Demo user has missing assignments. Seeding 6 mock "Quiz on Electricity" assignments matching Figma mockup...');
+    // Seed mock assignments if database is empty or no assignments exist for the demo user
+    const count = await Assignment.countDocuments();
+    if (count === 0 && demoUser) {
+      console.log('Database is empty. Seeding 6 mock "Quiz on Electricity" assignments matching Figma mockup...');
       
       const mockAssignments = Array.from({ length: 6 }).map((_, i) => ({
         title: 'Quiz on Electricity',
