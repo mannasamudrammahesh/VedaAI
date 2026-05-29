@@ -455,22 +455,9 @@ const DEMO_ASSIGNMENTS: IAssignment[] = [
 
 // ─── END DEMO DATA ──────────────────────────────────────────────────────────
 
-let defaultApiUrl = 'http://localhost:5000';
-let defaultWsUrl = 'ws://localhost:5000/ws';
-
-if (typeof window !== 'undefined') {
-  const hostname = window.location.hostname;
-  const protocol = window.location.protocol;
-  const wsProtocol = protocol === 'https:' ? 'wss:' : 'ws:';
-  
-  if (hostname && hostname !== 'localhost' && hostname !== '127.0.0.1') {
-    defaultApiUrl = `${protocol}//${hostname}:5000`;
-    defaultWsUrl = `${wsProtocol}//${hostname}:5000/ws`;
-  }
-}
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || defaultApiUrl;
-const WS_URL = process.env.NEXT_PUBLIC_WS_URL || defaultWsUrl;
+// Next.js API routes are on the same domain, so we use relative paths!
+const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
+// WS_URL is no longer needed since we removed WebSockets.
 
 async function apiFetch(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
   try {
@@ -489,7 +476,7 @@ async function apiFetch(input: RequestInfo | URL, init?: RequestInit): Promise<R
   }
 }
 
-let socket: WebSocket | null = null;
+// Socket removed.
 
 export const useAssessmentStore = create<AssessmentState>((set, get) => ({
   assignments: [],
@@ -560,6 +547,15 @@ export const useAssessmentStore = create<AssessmentState>((set, get) => ({
 
   createAssignment: async (payload) => {
     try {
+      set((state) => ({
+        activeJob: {
+          assignmentId: 'temp',
+          status: 'generating',
+          progress: 50,
+          message: 'AI is generating the paper (this may take 20-30 seconds)...'
+        }
+      }));
+
       const res = await apiFetch(`${API_URL}/api/assignments`, {
         method: 'POST',
         headers: {
@@ -576,20 +572,14 @@ export const useAssessmentStore = create<AssessmentState>((set, get) => ({
 
       const newAssignment = await res.json();
       
-      // Update UI state
+      // Update UI state with completed assignment
       set((state) => ({
         assignments: [newAssignment, ...state.assignments],
-        activeJob: {
-          assignmentId: newAssignment._id,
-          status: 'pending',
-          progress: 5,
-          message: 'Assignment submitted to queue...'
-        }
+        activeJob: null // Done!
       }));
 
-      // Immediately connect WebSocket and subscribe
-      get().subscribeToJob(newAssignment._id);
-
+      // No websocket anymore!
+      
       return newAssignment;
     } catch (err) {
       console.error('Error in createAssignment:', err);
@@ -629,9 +619,9 @@ export const useAssessmentStore = create<AssessmentState>((set, get) => ({
       set({
         activeJob: {
           assignmentId: id,
-          status: 'pending',
-          progress: 5,
-          message: 'Requesting new paper parameters...'
+          status: 'generating',
+          progress: 50,
+          message: 'AI is regenerating the paper (this may take 20-30 seconds)...'
         }
       });
 
@@ -646,8 +636,13 @@ export const useAssessmentStore = create<AssessmentState>((set, get) => ({
         throw new Error('Failed to trigger paper regeneration');
       }
 
-      // Subscribe to real-time job progress
-      get().subscribeToJob(id);
+      const updatedAssignment = await res.json();
+
+      set((state) => ({
+        activeJob: null, // Done!
+        assignments: state.assignments.map(a => a._id === id ? updatedAssignment : a),
+        selectedAssignment: state.selectedAssignment?._id === id ? updatedAssignment : state.selectedAssignment
+      }));
 
     } catch (err) {
       console.error('Error regenerating assignment:', err);
@@ -656,65 +651,11 @@ export const useAssessmentStore = create<AssessmentState>((set, get) => ({
   },
 
   subscribeToJob: (assignmentId: string) => {
-    // If socket is already open, close it
-    if (socket) {
-      socket.close();
-    }
-
-    console.log(`Connecting to WebSocket: ${WS_URL}`);
-    socket = new WebSocket(WS_URL);
-
-    socket.onopen = () => {
-      console.log('WebSocket connected.');
-      set({ websocketConnected: true });
-      
-      // Subscribe to assignment events
-      socket?.send(JSON.stringify({
-        type: 'SUBSCRIBE_JOB',
-        data: { assignmentId }
-      }));
-    };
-
-    socket.onmessage = (event) => {
-      try {
-        const parsed = JSON.parse(event.data);
-        console.log('WS Message received:', parsed);
-
-        if (parsed.type === 'JOB_PROGRESS') {
-          const progressData: JobProgress = parsed.data;
-          set({ activeJob: progressData });
-
-          if (progressData.status === 'completed' || progressData.status === 'failed') {
-            console.log(`Job complete: ${progressData.status}. Refreshing listings.`);
-            get().fetchAssignments();
-            if (progressData.status === 'completed' && progressData.paper) {
-              // Update selected assessment details
-              get().fetchAssignmentDetails(assignmentId);
-            }
-            get().unsubscribeFromJob();
-          }
-        }
-      } catch (err) {
-        console.error('Error parsing WS message:', err);
-      }
-    };
-
-    socket.onclose = () => {
-      console.log('WebSocket connection closed.');
-      set({ websocketConnected: false });
-    };
-
-    socket.onerror = (err) => {
-      console.error('WebSocket encountered an error:', err);
-    };
+    // Deprecated for Next.js API Routes
   },
 
   unsubscribeFromJob: () => {
-    if (socket) {
-      socket.close();
-      socket = null;
-    }
-    set({ websocketConnected: false });
+    // Deprecated for Next.js API Routes
   },
 
   resetActiveJob: () => {

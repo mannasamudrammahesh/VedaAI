@@ -1,6 +1,6 @@
 [build]
   # Netlify automatically reads this file to configure the build
-  base    = "Veda AI/frontend"
+  base    = "frontend"
   command = "npm run build"
   publish = ".next"
 
@@ -12,3 +12,8 @@
   # NOTE: In production, you must set these inside the Netlify UI (Site settings > Environment variables)
   # Do not hardcode production URLs here!
   NODE_VERSION = "20"
+
+[functions]
+  node_bundler = "esbuild"
+  external_node_modules = ["pdf-parse", "adm-zip"]
+  timeout = 26

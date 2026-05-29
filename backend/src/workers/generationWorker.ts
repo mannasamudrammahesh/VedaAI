@@ -9,7 +9,6 @@ dotenv.config();
 
 const REDIS_HOST = process.env.REDIS_HOST || '127.0.0.1';
 const REDIS_PORT = parseInt(process.env.REDIS_PORT || '6379', 10);
-const REDIS_PASSWORD = process.env.REDIS_PASSWORD;
 
 // Unified direct standalone processor (runs in-memory if Redis is unavailable)
 export const processGenerationDirectly = async (data: {
@@ -35,7 +34,7 @@ export const processGenerationDirectly = async (data: {
     className
   } = data;
   
-  console.log(`[Standalone Worker] Started processing assignment: ${assignmentId}`);
+  console.log(`[Direct Processor] Started in-memory processing for assignment: ${assignmentId}`);
 
   const updateProgress = async (percent: number, msg: string) => {
     socketManager.sendToAssignmentSubscribers(assignmentId, 'JOB_PROGRESS', {
@@ -48,7 +47,7 @@ export const processGenerationDirectly = async (data: {
 
   try {
     // Step 1: Initializing
-    await updateProgress(10, 'Initializing generation pipeline...');
+    await updateProgress(10, 'Initializing standalone generation pipeline...');
     const assignment = await Assignment.findById(assignmentId);
     if (!assignment) {
       throw new Error('Assignment not found in database');
@@ -59,7 +58,8 @@ export const processGenerationDirectly = async (data: {
 
     // Step 2: Preparing inputs
     await updateProgress(30, 'Parsing questions configurations & upload streams...');
-    
+    await new Promise((resolve) => setTimeout(resolve, 800)); // Smooth transition pause for visual feedback
+
     // Step 3: Call AI Service
     await updateProgress(60, 'Generating assessment sections and custom answer key using Grok AI...');
     const generatedPaper = await aiService.generateQuestionPaper(
@@ -75,13 +75,14 @@ export const processGenerationDirectly = async (data: {
 
     // Step 4: Validating and saving
     await updateProgress(85, 'Polishing structure, tags, and formatting layouts...');
-    
+    await new Promise((resolve) => setTimeout(resolve, 600)); // Smooth visual pause
+
     assignment.generatedPaper = generatedPaper;
     assignment.status = 'completed';
     await assignment.save();
 
     // Step 5: Finished
-    console.log(`[Standalone Worker] Completed assignment generation successfully: ${assignmentId}`);
+    console.log(`[Direct Processor] Completed assignment generation successfully: ${assignmentId}`);
     socketManager.sendToAssignmentSubscribers(assignmentId, 'JOB_PROGRESS', {
       assignmentId,
       status: 'completed',
@@ -91,18 +92,19 @@ export const processGenerationDirectly = async (data: {
     });
 
   } catch (error: any) {
-    console.error(`[Standalone Worker] Error generating assignment ${assignmentId}:`, error);
+    console.error(`[Direct Processor] Standalone generation failed for assignment ${assignmentId}:`, error);
     
-    // Update DB
+    // Update DB status
     try {
       await Assignment.findByIdAndUpdate(assignmentId, {
         status: 'failed',
         error: error.message || 'Unknown generation error'
       });
     } catch (dbErr) {
-      console.error('[Standalone Worker] Failed to write error state to DB:', dbErr);
+      console.error('[Direct Processor] Failed to save error state to DB:', dbErr);
     }
 
+    // Broadcast failure
     socketManager.sendToAssignmentSubscribers(assignmentId, 'JOB_PROGRESS', {
       assignmentId,
       status: 'failed',
@@ -118,8 +120,6 @@ export const startWorker = (): void => {
     const workerRedis = new IORedis({
       host: REDIS_HOST,
       port: REDIS_PORT,
-      password: REDIS_PASSWORD,
-      tls: REDIS_PASSWORD ? {} : undefined,
       maxRetriesPerRequest: null,
       enableOfflineQueue: false,
       connectTimeout: 2000 // Fast fail
