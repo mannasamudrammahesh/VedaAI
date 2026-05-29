@@ -1,16 +1,12 @@
 [build]
-  # Netlify automatically reads this file to configure the build
-  base    = "frontend"
+  base = "frontend"
   command = "npm run build"
   publish = ".next"
 
 [[plugins]]
-  # This plugin ensures Next.js App Router API routes, Image Optimization, and Middleware work on Netlify's Edge network
   package = "@netlify/plugin-nextjs"
 
 [build.environment]
-  # NOTE: In production, you must set these inside the Netlify UI (Site settings > Environment variables)
-  # Do not hardcode production URLs here!
   NODE_VERSION = "20"
 
 [functions]
